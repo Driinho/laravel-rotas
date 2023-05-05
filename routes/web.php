@@ -4,6 +4,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 use Illuminate\Support\Facades\Route;
+use \Illuminate\Http\Request;
 
 /*
 |--------------------------------------------------------------------------
@@ -248,13 +249,13 @@ Route::prefix('/nota') ->group(function() {
         foreach($alunos as $aluno) {
             
             $response .= "<tr>";
-            if($nome != null) {
-                if(in_array($nome, $aluno) && in_array($matricula, $aluno)) {
+            if($nome != null) {;
+                if(strcasecmp($nome, $aluno['nome']) == 0) {
                     $aluno['nota'] = $nota;
                     $contemAlunoNome = true;
                 }
             } else {
-                if(in_array($matricula, $aluno)) {
+                if($matricula == $aluno['matricula']) {
                     $aluno['nota'] = $nota;
                     $contemAlunoMatricula = true;
                 }
@@ -267,7 +268,122 @@ Route::prefix('/nota') ->group(function() {
             $response .= "</tr>";
         }
 
-        $response = "</table>";
+        $response .= "</table>";
+
+        if($contemAlunoNome) {
+            return $response;
+        } else if ($contemAlunoMatricula) {
+            return $response;
+        }
+
+        return "<h1>Aluno não encontrado!!</h1>";
+    })->where('nota', '[0-9]+')->where('matricula', '[0-9]+')->where('nome', '[a-zA-Z]+');
+
+    Route::get('/conceito/{A}/{B}/{C}', function($A, $B, $C) {
+        $alunos = array(
+            array("matricula" => 1,
+                    "nome" => "Ana",
+                    "nota" => 9),
+            array("matricula" => 2,
+                    "nome" => "Bruno",
+                    "nota" => 2),
+            array("matricula" => 3,
+                    "nome" => "Carol",
+                    "nota" => 8),
+            array("matricula" => 4,
+                    "nome" => "Danilo",
+                    "nota" => 6),
+            array("matricula" => 5,
+                    "nome" => "Ellen",
+                    "nota" => 4)
+        );
+
+        $response = "<table>
+                        <tr>
+                            <th>Matricula</th>
+                            <th>Aluno</th>
+                            <th>Nota</th>
+                        </tr>";
+
+        foreach($alunos as $aluno) {
+            $response .= "<tr>";
+
+            if($aluno['nota'] >= $A) {
+                $aluno['nota'] = 'A';
+            } else if($aluno['nota'] >= $B) {
+                $aluno['nota'] = 'B';
+            } else if($aluno['nota'] >= $C) {
+                $aluno['nota'] = 'C';
+            } else {
+                $aluno['nota'] = 'D';
+            }
+
+            foreach($aluno as $item) {
+                $response .= "<td> $item </td>";
+            }
+
+            $response .= "</tr>";
+        }
+
+        $response .= "</table>";
+
+        return $response;
+    })->where('A', '[0-9]+')->where('B', '[0-9]+')->where('C', '[0-9]+');
+
+    Route::post('/conceito', function(Request $request) {
+        $alunos = array(
+            array("matricula" => 1,
+                    "nome" => "Ana",
+                    "nota" => 9),
+            array("matricula" => 2,
+                    "nome" => "Bruno",
+                    "nota" => 2),
+            array("matricula" => 3,
+                    "nome" => "Carol",
+                    "nota" => 8),
+            array("matricula" => 4,
+                    "nome" => "Danilo",
+                    "nota" => 6),
+            array("matricula" => 5,
+                    "nome" => "Ellen",
+                    "nota" => 4)
+        );
+
+        $input = $request->all();
+
+        $A = $input['A'];
+        $B = $input['B'];
+        $C = $input['C'];
+
+
+        $response = "<table>
+                        <tr>
+                            <th>Matricula</th>
+                            <th>Aluno</th>
+                            <th>Nota</th>
+                        </tr>";
+
+        foreach($alunos as $aluno) {
+            $response .= "<tr>";
+
+            if($aluno['nota'] >= $A) {
+                $aluno['nota'] = 'A';
+            } else if($aluno['nota'] >= $B) {
+                $aluno['nota'] = 'B';
+            } else if($aluno['nota'] >= $C) {
+                $aluno['nota'] = 'C';
+            } else {
+                $aluno['nota'] = 'D';
+            }
+
+            foreach($aluno as $item) {
+                $response .= "<td> $item </td>";
+            }
+
+            $response .= "</tr>";
+        }
+
+        $response .= "</table>";
 
         return $response;
     });
